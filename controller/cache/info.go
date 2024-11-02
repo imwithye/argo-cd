@@ -93,8 +93,12 @@ func getIngress(un *unstructured.Unstructured) []v1.LoadBalancerIngress {
 func populateServiceInfo(un *unstructured.Unstructured, res *ResourceInfo) {
 	targetLabels, _, _ := unstructured.NestedStringMap(un.Object, "spec", "selector")
 	ingress := make([]v1.LoadBalancerIngress, 0)
-	if serviceType, ok, err := unstructured.NestedString(un.Object, "spec", "type"); ok && err == nil && serviceType == string(v1.ServiceTypeLoadBalancer) {
-		ingress = getIngress(un)
+	serviceType, ok, err := unstructured.NestedString(un.Object, "spec", "type")
+	if ok && err == nil {
+		res.Info = append(res.Info, v1alpha1.InfoItem{Name: "Service Type", Value: serviceType})
+		if serviceType == string(v1.ServiceTypeLoadBalancer) {
+			ingress = getIngress(un)
+		}
 	}
 
 	var urls []string
